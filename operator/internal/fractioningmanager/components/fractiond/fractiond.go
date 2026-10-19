@@ -14,6 +14,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/utils/ptr"
 )
 
 const (
@@ -102,6 +103,11 @@ func (d *daemon) BuildDaemonSet(opts daemonmgr.BuildOptions) *appsv1.DaemonSet {
 	podSpec.NodeSelector = daemonmgr.DaemonNodeSelector(opts.NodeSelector)
 	podSpec.Tolerations = opts.Tolerations
 	podSpec.HostPID = true
+	// Set for identity, not access: OpenShift admits these privileged pods against
+	// the SecurityContextConstraints granted to their ServiceAccount. Neither
+	// container calls the Kubernetes API, so the token stays unmounted.
+	podSpec.ServiceAccountName = opts.ServiceAccountName
+	podSpec.AutomountServiceAccountToken = ptr.To(false)
 
 	fractiondContainer, fractiondVolumes := d.buildFractiondContainer(opts)
 	podSpec.Volumes = append(podSpec.Volumes, fractiondVolumes...)

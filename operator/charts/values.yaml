@@ -56,6 +56,25 @@ fullnameOverride: ""
 # provides NVIDIA GPU/NVML access.
 runtimeClassName: "nvidia"
 
+# openshift covers what an OpenShift cluster needs beyond a stock Kubernetes
+# install: a SecurityContextConstraints for the daemons, and CRI-O's socket path
+# instead of containerd's.
+openshift:
+  # enabled selects the OpenShift-specific resources and defaults.
+  #
+  #   auto  - detect by the presence of the security.openshift.io/v1 API group
+  #           (default)
+  #   true  - render them regardless
+  #   false - never render them
+  #
+  # Detection reads the cluster's API groups, so `helm template` and other
+  # off-cluster renders see nothing and need enabled=true.
+  enabled: auto
+  securityContextConstraints:
+    # Disable only to supply your own SCC and `use` grant for the daemon
+    # ServiceAccount; the daemons are not admissible without one.
+    create: true
+
 # daemonTolerations are the tolerations on the fractiond and mpsd DaemonSets,
 # which run on the GPU nodes selected by the CR's spec.nodeSelector. The
 # chart-level `tolerations` below applies to the controller Deployment instead.
@@ -110,6 +129,20 @@ mpsd:
   # server that containers opt into via the gpu-compute.mode: sm-sharing
   # annotation.
   auditLog: true
+
+# fractioningAgent configures the fractiond DaemonSet on the generated CR.
+fractioningAgent:
+  # logLevel for fractiond. Empty keeps the operator's default.
+  logLevel: ""
+  # criSocketPath is the CRI runtime socket fractiond uses to stop containers
+  # during retroactive enforcement. Empty resolves to CRI-O's socket on OpenShift
+  # and leaves the CR field unset elsewhere, where the API server defaults it to
+  # containerd's. Set it for any other runtime or socket location.
+  #
+  # A wrong path does not fail loudly: only the socket's parent directory is
+  # mounted, with DirectoryOrCreate, so retroactive enforcement silently never
+  # fires while fractiond otherwise runs normally.
+  criSocketPath: ""
 
 metricsAgent:
   enabled: true

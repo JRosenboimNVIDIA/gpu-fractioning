@@ -43,8 +43,11 @@ func TestDaemon_BuildDaemonSet_Basics(t *testing.T) {
 	if !spec.HostPID {
 		t.Error("expected HostPID=true")
 	}
-	if spec.ServiceAccountName != "" {
-		t.Errorf("serviceAccountName = %q, expected empty", spec.ServiceAccountName)
+	if spec.ServiceAccountName != testDaemonServiceAccountName {
+		t.Errorf("serviceAccountName = %q, expected %s", spec.ServiceAccountName, testDaemonServiceAccountName)
+	}
+	if spec.AutomountServiceAccountToken == nil || *spec.AutomountServiceAccountToken {
+		t.Error("expected automountServiceAccountToken=false")
 	}
 
 	// Node selector
