@@ -4,9 +4,8 @@
 fractioningAgent:
   logLevel: debug
 
-# k3d has no real "nvidia" runtime; clear it so daemon pods use the node default.
-# The e2e images provide the fake NVIDIA/NVML pieces they need.
-runtimeClassName: ""
+# Exercise the real toolkit runtime installed by GPU Operator.
+runtimeClassName: nvidia
 
 metricsAgent:
   logLevel: debug
