@@ -17,6 +17,7 @@ FGO, its status updater, and the old standalone NVML DaemonSet are not installed
 Fake MPS remains necessary: it exercises the real supervisor and socket readiness without CUDA. The metrics image and its ConfigMap remain test-controlled so tests can supply known host PIDs, GPU memory and utilization. This is not a test of hardware memory enforcement. The real NVIDIA memory-limit hook is enabled; Mokka acknowledges its NVML call without enforcing a limit.
 
 Metricsd reads its test ConfigMap from `/etc/gpu-fractioning-test/config.yaml`. This keeps test process data separate from Mokka's CDI mount at `/etc/nvml-mock`.
+The test image sets this path at process startup because CDI can replace image environment variables. It also clears Mokka's node override path so node activity cannot change the controlled metrics input.
 
 ## Run
 
